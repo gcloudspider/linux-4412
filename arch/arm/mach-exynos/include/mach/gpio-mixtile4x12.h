@@ -30,6 +30,7 @@
 
 #define GPIO_USBHUB_POWER       EXYNOS4_GPM3(7)     // USB_HUB 芯片电源控制
 //#define GPIO_USB5V_POWER        EXYNOS4_GPX3(4)     // USB_HOST 5V 电源控制
+#define GPIO_USB5V_POWER        EXYNOS4_GPM3(6)     // USB_HOST 5V 电源控制
 #define GPIO_USBOTG_ID          EXYNOS4_GPX0(0)     // USB OTG ID
 #define GPIO_USBOTG_POWER       EXYNOS4_GPM3(4)     // USB OTG 5V 电源控制
 #define GPIO_USBOTG_VBUS        EXYNOS4_GPX1(1)     // USB VBUS 中断检测
@@ -58,7 +59,7 @@
 
 //#define GPIO_RFID_PWR_CTRL      EXYNOS4_GPX2(7)     // RFID 电源控制
 
-#define GPIO_CHARGE_STATE1      EXYNOS4_GPX3(0)     // 充电状态指示1
-#define GPIO_CHARGE_STATE2      EXYNOS4_GPX3(1)     // 充电状态指示2
+#define GPIO_CHARGE_STATE1      EXYNOS4_GPX1(3)     // 充电状态指示1
+#define GPIO_CHARGE_STATE2      EXYNOS4_GPX3(0)     // 充电状态指示2
 
 #endif /* __ASM_ARCH_GPIO_MIXTILE4X12_H */

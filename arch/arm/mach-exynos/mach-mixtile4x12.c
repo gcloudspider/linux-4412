@@ -102,6 +102,7 @@
 #include <../../../drivers/staging/android/timed_gpio.h>
 #include <mach/gpio-mixtile4x12.h>
 #include "mixtile4x12.h"
+#include "linux/l3g4200d.h"
 
 int dev_ver=0;
 EXPORT_SYMBOL(dev_ver);
@@ -360,6 +361,54 @@ static struct s3c_platform_camera tvp5151 = {
 };
 #endif /* CONFIG_VIDEO_TVP5150 */
 
+#ifdef CONFIG_VIDEO_MT9P111
+#define MT9P111_WIDTH  800
+#define MT9P111_HEIGHT 600
+static struct mixtile_camera_data mt9p111_plat = {
+	.default_width = MT9P111_WIDTH,
+	.default_height = MT9P111_HEIGHT,
+	.pixelformat = V4L2_PIX_FMT_YUYV,
+	.freq = 48000000,
+	.is_mipi = 0,
+};
+
+static struct i2c_board_info mt9p111_i2c_info = {
+	I2C_BOARD_INFO("MT9P111", 0x3C),
+	.platform_data = &mt9p111_plat,
+};
+
+static struct s3c_platform_camera mt9p111 = {
+	.id		= CAMERA_PAR_B,
+	.clk_name	= "sclk_cam1",
+	.i2c_busnum	= 1,
+	.cam_power	= mixtile4x12_cam_b_power,
+	.type		= CAM_TYPE_ITU,
+	.fmt		= ITU_601_YCBCR422_8BIT,
+	.order422	= CAM_ORDER422_8BIT_CBYCRY,
+	.info		= &mt9p111_i2c_info,
+	.pixelformat	= V4L2_PIX_FMT_YUYV,
+	.srclk_name	= "xusbxti",
+	.clk_rate	= 24000000,
+	.line_length	= MT9P111_WIDTH,
+	.width		= MT9P111_WIDTH,
+	.height		= MT9P111_HEIGHT,
+	.window		= {
+		.left	= 0,
+		.top	= 0,
+  	.width		= MT9P111_WIDTH,
+  	.height		= MT9P111_HEIGHT,
+	},
+
+	/* Polarity */
+	.inv_pclk	= 0,
+	.inv_vsync	= 1,
+	.inv_href	= 0,
+	.inv_hsync	= 0,
+	.reset_camera	= 0,
+	.initialized	= 1,
+};
+#endif /* CONFIG_VIDEO_MT9P111 */
+
 /* Interface setting */
 static struct s3c_platform_fimc fimc_plat = {
 #ifdef CONFIG_ITU_A
@@ -374,6 +423,9 @@ static struct s3c_platform_fimc fimc_plat = {
   .camera    = {
 #ifdef CONFIG_VIDEO_GC2015
 		&gc2015,                //cam_id = 0;
+#endif
+#ifdef CONFIG_VIDEO_MT9P111
+		&mt9p111,
 #endif
 #ifdef CONFIG_VIDEO_TVP5150
     &tvp5151,
@@ -653,10 +705,10 @@ void usb_hub_power(int onoff)
     gpio_direction_output(GPIO_USBHUB_POWER, onoff);
 }
 
-/*void usb_host_power(int onoff)
+void usb_host_power(int onoff)
 {
   gpio_direction_output(GPIO_USB5V_POWER, onoff);
-}*/
+}
 
 ///* USB OTG POWER */
 //void usb_otg_power(int onoff)
@@ -759,6 +811,21 @@ static struct i2c_board_info i2c_devs2[] __initdata = {
 static struct i2c_board_info i2c_devs3[] __initdata = {
 #ifdef CONFIG_SENSORS_MMA8452
 	{ I2C_BOARD_INFO("mma8452", 0x1D), },
+#endif
+#ifdef CONFIG_SENSORS_AFA750
+	{ I2C_BOARD_INFO("afa750", 0x7A>>1), },
+#endif
+#ifdef CONFIG_GYRO_L3G4200D
+	{ I2C_BOARD_INFO("l3g4200d", 0x69), },
+#endif
+#ifdef CONFIG_COMPASS_MMC3280
+	{ I2C_BOARD_INFO("mmc3280", 0x30), },
+#endif
+#ifdef CONFIG_LIGHT_BH1750
+	{ I2C_BOARD_INFO("bh1750", 0x23), },
+#endif
+#ifdef CONFIG_SENSORS_APDS9900
+	{ I2C_BOARD_INFO("apds9900", 0x39),},
 #endif
 };
 
@@ -980,6 +1047,50 @@ static void __init mixtile4x12_dm9000_init(void)
 }
 #endif /* CONFIG_DM9000 */
 
+#ifdef CONFIG_AX88796
+
+#define AX88796_PA (EXYNOS4_PA_SROM_BANK(1))
+
+static void __init mixtile4x12_ax88796_init(void)
+{
+	u32 tmp;
+	//AX88796 Ê±Ðò
+	tmp = (2<<4)|(2<<8)|(2<<12)|(3<<16)|(2<<24)|(2<<28);
+	__raw_writel(tmp, S5P_SROM_BC1);
+	//SROM_BW ÅäÖÃ
+	tmp = __raw_readl(S5P_SROM_BW);
+
+	tmp &= ~(S5P_SROM_BW__CS_MASK << S5P_SROM_BW__NCS1__SHIFT);
+	
+	tmp |= (0xb << S5P_SROM_BW__NCS1__SHIFT);
+	__raw_writel(tmp, S5P_SROM_BW);
+
+//  s3c_gpio_setpull(EXYNOS4_GPX3(3), S3C_GPIO_PULL_DOWN);
+  s3c_gpio_cfgpin(EXYNOS4_GPX2(5), S3C_GPIO_SFN(0xF));    
+    
+}
+
+static struct resource anubis_asix_resource[] = {
+	[0] = {
+		.start = AX88796_PA,
+		.end   = AX88796_PA + 0xFFFFF,//(0x20 * 0x20) -1,
+		.flags = IORESOURCE_MEM
+	},
+	[1] = {
+		.start = IRQ_EINT(21),
+		.end   = IRQ_EINT(21),
+		.flags = IORESOURCE_IRQ | IORESOURCE_IRQ_LOWLEVEL
+	}
+};
+
+static struct platform_device mixtile4x12_ax88796 = {
+	.name		= "ax88796",
+	.id		= 0,
+	.num_resources	= ARRAY_SIZE(anubis_asix_resource),
+	.resource	= anubis_asix_resource,
+};
+#endif /* CONFIG_AX88796 */
+
 static void gps_gpio_init(void)
 {
 	struct device *gps_dev;
@@ -1140,6 +1251,9 @@ static struct platform_device *mixtile4x12_devices[] __initdata = {
 #endif
 #ifdef CONFIG_DM9000
   &mixtile4x12_dm9000,
+#endif
+#ifdef CONFIG_AX88796
+	&mixtile4x12_ax88796,
 #endif
 #ifdef CONFIG_WAKEUP_ASSIST
   &wakeup_assist_device,
@@ -1645,6 +1759,22 @@ static int mixtile4x12_get_ver(int channel)
   return 0;
 }
 
+struct s3c2410_platform_i2c default_i2c1_data __initdata = {
+	.flags		= 0,
+	.slave_addr	= 0x10,
+	.frequency	= 100*1000,
+	.sda_delay	= 100,
+	.bus_num = 1,
+};
+
+struct s3c2410_platform_i2c default_i2c3_data __initdata = {
+	.flags		= 0,
+	.slave_addr	= 0x10,
+	.frequency	= 200*1000,
+	.sda_delay	= 100,
+	.bus_num = 3,
+};
+
 static void __init mixtile4x12_machine_init(void)
 {
   dev_ver = mixtile4x12_get_ver(3);
@@ -1678,13 +1808,14 @@ static void __init mixtile4x12_machine_init(void)
   s3c_i2c0_set_platdata(NULL);
   i2c_register_board_info(0, i2c_devs0, ARRAY_SIZE(i2c_devs0));
 
-  s3c_i2c1_set_platdata(NULL);
+//  s3c_i2c1_set_platdata(NULL);
+  s3c_i2c1_set_platdata(&default_i2c1_data);
   i2c_register_board_info(1, i2c_devs1, ARRAY_SIZE(i2c_devs1));
 
   s3c_i2c2_set_platdata(NULL);
   i2c_register_board_info(2, i2c_devs2, ARRAY_SIZE(i2c_devs2));
 
-  s3c_i2c3_set_platdata(NULL);
+  s3c_i2c3_set_platdata(&default_i2c3_data);
   i2c_register_board_info(3, i2c_devs3, ARRAY_SIZE(i2c_devs3));
 
   s3c_i2c4_set_platdata(NULL);
@@ -1713,6 +1844,10 @@ static void __init mixtile4x12_machine_init(void)
 
 #ifdef CONFIG_DM9000
   mixtile4x12_dm9000_init();
+#endif
+
+#ifdef CONFIG_AX88796
+	mixtile4x12_ax88796_init();
 #endif
 
 #ifdef CONFIG_S3C_DEV_HSMMC
@@ -1835,8 +1970,8 @@ static void __init mixtile4x12_machine_init(void)
   {
     usb_hub_power(1);
     msleep(200);
-    //usb_host_power(1);
-    //msleep(200);
+    usb_host_power(1);
+    msleep(200);
   }
   mixtile4x12_switch_init();
   

@@ -146,7 +146,7 @@ obj-$(CONFIG_SB1250_MAC) += sb1250-mac.o
 obj-$(CONFIG_B44) += b44.o
 obj-$(CONFIG_FORCEDETH) += forcedeth.o
 obj-$(CONFIG_NE_H8300) += ne-h8300.o
-obj-$(CONFIG_AX88796) += ax88796.o
+obj-$(CONFIG_AX88796) += ax88796/
 obj-$(CONFIG_BCM63XX_ENET) += bcm63xx_enet.o
 obj-$(CONFIG_FTMAC100) += ftmac100.o
 

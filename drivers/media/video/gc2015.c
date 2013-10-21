@@ -576,6 +576,7 @@ static int gc2015_s_fmt(struct v4l2_subdev *sd, struct v4l2_mbus_framefmt *fmt)
   		num = ((sizeof(GC2015_capture_svga)/sizeof(GC2015_capture_svga[0])));			
   		for(i=0; i<num; i++)
   			gc2015_i2c_write(sd, GC2015_capture_svga[i], 2);
+      state->framesize_index = 2;
       break;
   }
 

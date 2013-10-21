@@ -119,6 +119,7 @@ obj-$(CONFIG_SENSORS_W83L786NG)	+= w83l786ng.o
 obj-$(CONFIG_SENSORS_WM831X)	+= wm831x-hwmon.o
 obj-$(CONFIG_SENSORS_WM8350)	+= wm8350-hwmon.o
 obj-$(CONFIG_SENSORS_MMA8452)	+= mma8452.o
+obj-$(CONFIG_SENSORS_AFA750)	+= afa750.o
 
 # PMBus drivers
 obj-$(CONFIG_PMBUS)		+= pmbus_core.o
@@ -131,4 +132,7 @@ obj-$(CONFIG_SENSORS_UCD9000)	+= ucd9000.o
 obj-$(CONFIG_SENSORS_UCD9200)	+= ucd9200.o
 
 ccflags-$(CONFIG_HWMON_DEBUG_CHIP) := -DDEBUG
-
+obj-$(CONFIG_GYRO_L3G4200D) += l3g4200.o
+obj-$(CONFIG_COMPASS_MMC3280) += mmc3280.o
+obj-$(CONFIG_LIGHT_BH1750) += bh1750.o
+obj-$(CONFIG_SENSORS_APDS9900) += apds9900.o

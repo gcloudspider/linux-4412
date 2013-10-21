@@ -1991,12 +1991,18 @@ int fimc_s_crop_output(void *fh, struct v4l2_crop *a)
 		fimc_err("top = %d, width = %d\n", a->c.top, a->c.height);
 		return -EINVAL;
 	}
-
+	
+#ifdef CONFIG_VIDEO_TVP5150
+	ctx->crop.left = a->c.left+50;
+	ctx->crop.top = a->c.top;
+	ctx->crop.width = a->c.width -50;
+	ctx->crop.height = a->c.height;
+#else
 	ctx->crop.left = a->c.left;
 	ctx->crop.top = a->c.top;
 	ctx->crop.width = a->c.width;
 	ctx->crop.height = a->c.height;
-
+#endif
 	return 0;
 }
 

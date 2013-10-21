@@ -424,10 +424,13 @@ static charger_type_t samsung_get_charge_source(charger_type_t *source)
   state1 = gpio_get_value(GPIO_CHARGE_STATE1);
   state2 = gpio_get_value(GPIO_CHARGE_STATE2);
   
+  if(state1 == 0)
+  	return ret_source;
+
   if(state1==1)
     ret_source = CHARGER_AC;
 
-  if((state1==0) && (state2==1))
+  if((state1==1) && (state2==1))
   {
     ret_source = CHARGER_AC;
     *source = CHARGE_FULL;
@@ -470,7 +473,7 @@ static void mixtile_adc_bat_status_update(unsigned long unused)
     last_adc_value = adc;
   else
   {
-    printk("%d %d %d %d\n", last_adc_value, adc, abs(last_adc_value-adc), charge_change);
+//    printk("%d %d %d %d\n", last_adc_value, adc, abs(last_adc_value-adc), charge_change);
     if((abs(last_adc_value-adc) >ADC_JITTER_VAL) && (charge_change==0))
       return;
   }

@@ -821,6 +821,34 @@ config SENSORS_MMA8452
 	  These devices are hard to detect and rarely found on mainstream
 	  hardware.  If unsure, say N.
 
+config SENSORS_AFA750
+	tristate "afa750 sensor chips"
+	depends on I2C
+	default n
+	help
+	  These devices are hard to detect and rarely found on mainstream
+	  hardware.  If unsure, say N.
+	  
+config GYRO_L3G4200D
+	tristate "ST L3G4200D sensor chips"
+	depends on I2C
+	default N
+
+config COMPASS_MMC3280
+	tristate "Compass MMC3280 sensor chips"
+	depends on I2C
+	default N
+	
+config LIGHT_BH1750
+	tristate "Light Intensity BH1750 sensor chips"
+	depends on I2C
+	default N
+
+config SENSORS_APDS9900
+	tristate "Promixity and Ambient sensor chips APDS9900"
+	depends on I2C
+	default N
+			  
 config PMBUS
 	tristate "PMBus support"
 	depends on I2C && EXPERIMENTAL

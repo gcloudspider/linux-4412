@@ -557,6 +557,13 @@ config VIDEO_GC2015
 	---help---
 	  GC2015 for front camera
 
+config VIDEO_MT9P111
+	tristate "MT9P111 camera driver for BACK camera"
+	depends on I2C && VIDEO_V4L2 && (VIDEO_FIMC || VIDEO_SAMSUNG_S5P_FIMC) && !(VIDEO_FIMC_MIPI || VIDEO_S5P_MIPI_CSIS)
+	select ITU_A
+	---help---
+	  MT9P111 for BACK camera
+	  
 comment "Video and audio decoders"
 
 config VIDEO_SAA717X
